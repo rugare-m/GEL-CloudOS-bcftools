@@ -1,21 +1,20 @@
 nextflow.enable.dsl = 2
 
-include { SPLIT_VCF_BY_SAMPLE } from './modules/bcftools'
-
-
-params.vcf_dir = params.vcf_dir ?: "/path/to/vcfs"
+params.vcf_dir = params.vcf_dir ?: "filtered_vcfs"
 params.outdir  = params.outdir  ?: "split_vcfs"
+
+include { SPLIT_VCF_BY_SAMPLE } from './modules/bcftools'
 
 
 workflow {
 
     vcf_ch = Channel
-        .fromPath("${params.vcf_dir}/*PASS.vcf", checkIfExists: true)
+        .fromPath("${params.vcf_dir}/*.PASS.vcf.gz", checkIfExists: true)
         .map { vcf ->
 
             // Example:
-            // FAMILY001_PASS.vcf -> FAMILY001
-            vcf_id = vcf.name.replaceFirst(/_?PASS\.vcf$/, '')
+            // FAMILY001.PASS.vcf.gz -> FAMILY001
+            vcf_id = vcf.name.replaceFirst(/\.PASS\.vcf\.gz$/, '')
 
             tuple(vcf_id, vcf)
         }
